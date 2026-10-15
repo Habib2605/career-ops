@@ -352,6 +352,8 @@ export function buildHtml(payload, templatePath) {
     "{{CONTACT_LINE}}": buildContactLine(candidate),
     "{{CREDENTIALS_BLOCK}}": buildCredentialsBlock(candidate),
     "{{ROLE_TITLE}}": escapeHtml(letter.role_title),
+    // Heading label, so a non-English letter is not titled "Cover Letter".
+    "{{TITLE_LABEL}}": escapeHtml(letter.title_label || "Cover Letter"),
     "{{DATELINE}}": buildDateline(letter, rendersRecipientBlock),
     "{{RECIPIENT_BLOCK}}": recipientBlock,
     "{{GREETING_BLOCK}}": greetingBlock,

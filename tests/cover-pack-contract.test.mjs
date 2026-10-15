@@ -34,12 +34,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildHtml } from '../generate-cover-letter.mjs';
 
-/** The 15 cover-letter slots the pack authoring contract declares. */
+/** The 16 cover-letter slots the pack authoring contract declares. */
 const CONTRACT_SLOTS = [
-  'NAME', 'ROLE_TITLE', 'CONTACT_LINE', 'DATELINE', 'RECIPIENT_BLOCK',
-  'GREETING_BLOCK', 'OPENING', 'PROFILE_INTRO', 'PROBLEMS_BLOCK',
-  'ACHIEVEMENTS_BLOCK', 'CREDENTIALS_BLOCK', 'CLOSING_BLOCK',
-  'LANGUAGE_CLOSING_BLOCK', 'SIGNATURE_BLOCK', 'FOOTNOTES_BLOCK',
+  'NAME', 'ROLE_TITLE', 'TITLE_LABEL', 'CONTACT_LINE', 'DATELINE',
+  'RECIPIENT_BLOCK', 'GREETING_BLOCK', 'OPENING', 'PROFILE_INTRO',
+  'PROBLEMS_BLOCK', 'ACHIEVEMENTS_BLOCK', 'CREDENTIALS_BLOCK',
+  'CLOSING_BLOCK', 'LANGUAGE_CLOSING_BLOCK', 'SIGNATURE_BLOCK',
+  'FOOTNOTES_BLOCK',
 ];
 
 /**
@@ -129,6 +130,23 @@ const SLOT_VALUES = [
   ['SIGNATURE_BLOCK', FULL.letter.signature.valediction],
   ['FOOTNOTES_BLOCK', FULL.letter.footnotes[0]],
 ];
+
+test('TITLE_LABEL carries the payload label, and defaults to English', () => {
+  // The slot exists so a non-English letter is not headed "Cover Letter". Both
+  // directions are pinned: an explicit label reaches the slot, and a payload
+  // that omits it still renders the English default rather than an empty
+  // heading, which is what every letter written before the slot existed relies
+  // on.
+  const labelled = buildHtml(
+    { ...FULL, letter: { ...FULL.letter, title_label: 'TITLE-LABEL-SENTINEL' } },
+    packTemplate(),
+  );
+  assert.ok(slotHtml(labelled, 'TITLE_LABEL').includes('TITLE-LABEL-SENTINEL'),
+    'TITLE_LABEL does not carry an explicitly supplied label');
+
+  assert.ok(slotHtml(buildHtml(FULL, packTemplate()), 'TITLE_LABEL').includes('Cover Letter'),
+    'a payload with no title_label must still render the English default');
+});
 
 test('a template carrying every contract slot renders at all', () => {
   // The failure this replaces was a hard throw on the first unfilled slot, so
